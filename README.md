@@ -169,6 +169,7 @@ Standard: C++11 (but C++14 or higher is recommended)
 
 - Include [pianolizer.hpp](cpp/pianolizer.hpp) in your project. It is reasonably well commented and documented and relevant examples are provided inline.
 - [benchmark.cpp](cpp/benchmark.cpp) is a good starting point.
+- [doorbell.cpp](cpp/doorbell.cpp) uses SDFT to trigger HTTP requests by the ringing doorbell.
 - [test.cpp](cpp/test.cpp) describes the expected behavior of the library.
 
 ### JavaScript & WebAssembly
