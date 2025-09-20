@@ -1,5 +1,25 @@
 # Pianolizer
 
+## Start the app
+
+### Prerequisites
+
+- Python 3.8 or newer (for the built-in `http.server` module). Many OSes ship it by default; otherwise install it via your package manager, Homebrew (`brew install python3`), or from [python.org](https://www.python.org/downloads/).
+
+### Launch
+
+From the project root run a local static server:
+
+```
+python3 -m http.server --bind 127.0.0.1 8000
+```
+
+Then open http://127.0.0.1:8000/ in your browser.
+
+### Stop
+
+Press `Ctrl+C` in the terminal where the server is running, or run `pkill -f "http.server 8000"` from another shell.
+
 ## Description
 
 A simple and efficient algorithm for spectral analysis of music.
