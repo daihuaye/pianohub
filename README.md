@@ -20,6 +20,14 @@ Then open http://127.0.0.1:8000/ in your browser.
 
 Press `Ctrl+C` in the terminal where the server is running, or run `pkill -f "http.server 8000"` from another shell.
 
+### Download the mp3 from youtube
+for example, https://www.youtube.com/watch?v=msP8f7pFdFg
+
+use the following command, it will download the sounds to ~/Music/ folder
+```
+yt-dlp -x --audio-format mp3 --audio-quality 0 -o "~/Music/%(title)s.%(ext)s" "https://www.youtube.com/watch?v=msP8f7pFdFg"
+```
+
 ## Description
 
 A simple and efficient algorithm for spectral analysis of music.
