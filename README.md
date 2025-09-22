@@ -23,6 +23,12 @@ Press `Ctrl+C` in the terminal where the server is running, or run `pkill -f "ht
 ### Download the mp3 from youtube
 for example, https://www.youtube.com/watch?v=msP8f7pFdFg
 
+Install [yt-dlp](https://github.com/yt-dlp/yt-dlp) if you don't already have it:
+
+- macOS (Homebrew): `brew install yt-dlp`
+- Linux (Debian/Ubuntu): `sudo apt install yt-dlp`
+- Windows: download the latest release binary and add it to your `PATH`.
+
 use the following command, it will download the sounds to ~/Music/ folder
 ```
 yt-dlp -x --audio-format mp3 --audio-quality 0 -o "~/Music/%(title)s.%(ext)s" "https://www.youtube.com/watch?v=msP8f7pFdFg"
