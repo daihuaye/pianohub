@@ -9,6 +9,13 @@ const waveform = {
 }
 
 // 441Hz wave period is 100 samples when the sample rate is 44100Hz
+/**
+ * Generate a normalized waveform sample for the requested oscillator type.
+ *
+ * @param {number} s Sample index.
+ * @param {number} [type=waveform.SINE] Waveform enum identifying the shape.
+ * @return {number} Sample value in the range [-1, 1].
+ */
 function oscillator (s, type = waveform.SINE) {
   switch (type) {
     case waveform.SINE:
@@ -22,6 +29,12 @@ function oscillator (s, type = waveform.SINE) {
   }
 }
 
+/**
+ * Exercise the DFT bin against a synthetic waveform and assert its magnitude.
+ *
+ * @param {number} type Waveform enum value to synthesize.
+ * @param {number} expected Expected normalized amplitude scaled by 1e6.
+ */
 function testDFT (type, expected) {
   const N = 1700
   const bin = new DFTBin(17, N)
@@ -41,6 +54,9 @@ function testDFT (type, expected) {
   }
 }
 
+/**
+ * Compare fast and heavy moving-average implementations with example data.
+ */
 function testMovingAverage () {
   const fma = new FastMovingAverage(2, sampleRate)
   fma.averageWindowInSeconds = 0.01

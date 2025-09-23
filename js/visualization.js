@@ -15,29 +15,28 @@ export class Palette {
   }
 
   /**
-   * Shift the colors around the octave.
+   * Current offset applied when rotating palette colors across keys.
    *
-   * @memberof Palette
+   * @return {number} Semitone offset from the original start color.
    */
   get rotation () {
     return this.startOffset
   }
 
   /**
-   * Shift the colors around the octave.
+   * Set a new rotation offset for the palette.
    *
-   * @memberof Palette
+   * @param {number} n Semitone offset to apply.
    */
   set rotation (n) {
     this.startOffset = n | 0
   }
 
   /**
-   * Applies the intensity levels to the palette.
+   * Translate per-key intensity levels into packed BGR color values.
    *
-   * @param {Float32Array} levels Array with the intensity levels.
-   * @return {Uint32Array} Palette with the levels applied, in a format compatible with canvas pixels.
-   * @memberof Palette
+   * @param {Float32Array} levels Normalized intensity values per key.
+   * @return {Uint32Array} Colors encoded as 0x00BBGGRR values.
    */
   getKeyColors (levels) {
     const levelsNum = levels.length
@@ -55,8 +54,17 @@ export class Palette {
   }
 }
 
+/**
+ * SVG piano keyboard renderer used by the visualization.
+ */
 export class PianoKeyboard {
   // Shamelessly stolen from http://www.quadibloc.com/other/cnv05.htm
+  /**
+   * Create a keyboard renderer backed by the provided SVG element.
+   *
+   * @param {SVGSVGElement} svgElement SVG container that hosts the keyboard graphics.
+   * @param {number} [scale=1] Multiplier applied to key dimensions.
+   */
   constructor (svgElement, scale = 1) {
     this.svgElement = svgElement
     this.scale = scale
@@ -83,6 +91,15 @@ export class PianoKeyboard {
     this.startOctave = 2
   }
 
+  /**
+   * Append a single key rectangle to the SVG group.
+   *
+   * @param {number} index Key index within the keyboard.
+   * @param {number} offset Horizontal offset in SVG units.
+   * @param {number} width Key width in SVG units.
+   * @param {number} height Key height in SVG units.
+   * @param {SVGGElement} group SVG group receiving the key.
+   */
   drawKey (index, offset, width, height, group) {
     const keyElement = document.createElementNS(this.ns, 'rect')
     keyElement.setAttribute('x', offset)
@@ -95,6 +112,15 @@ export class PianoKeyboard {
     group.appendChild(keyElement)
   }
 
+  /**
+   * Append a note label under a white key.
+   *
+   * @param {number} index Key index within the keyboard.
+   * @param {number} offset Horizontal offset in SVG units.
+   * @param {number} note Pitch class index used to compute label text.
+   * @param {number} octave Octave number for the label.
+   * @param {SVGGElement} group SVG group receiving the label.
+   */
   drawLabel (index, offset, note, octave, group) {
     const labelElement = document.createElementNS(this.ns, 'text')
     labelElement.setAttribute('x', offset + 5 * this.scale)
@@ -106,6 +132,9 @@ export class PianoKeyboard {
   }
 
   // Inspired by https://github.com/davidgilbertson/sight-reader/blob/master/app/client/Piano.js
+  /**
+   * Render the keyboard geometry and attach it to the SVG element.
+   */
   drawKeyboard () {
     const whiteKeyGroup = document.createElementNS(this.ns, 'g')
     const blackKeyGroup = document.createElementNS(this.ns, 'g')
@@ -152,6 +181,13 @@ export class PianoKeyboard {
     this.svgElement.setAttribute('height', this.whiteHeight)
   }
 
+  /**
+   * Convert a packed BGR integer into a CSS hex color string.
+   *
+   * @param {number} bgrInteger Color encoded as 0x00BBGGRR.
+   * @param {number} [start=0] Minimum channel intensity to enforce.
+   * @return {string} CSS hex color string in `#rrggbb` format.
+   */
   bgrIntegerToHex (bgrInteger, start = 0) {
     // #kill me
     const range = (0xff - start) / 0xff
@@ -163,6 +199,12 @@ export class PianoKeyboard {
     return '#' + rgbArray.map(c => c.toString(16).padStart(2, '0')).join('')
   }
 
+  /**
+   * Apply incoming colors to the rendered key elements.
+   *
+   * @param {Uint32Array} audioColors BGR colors representing analyzer output.
+   * @param {Uint32Array} midiColors BGR colors representing MIDI velocity.
+   */
   update (audioColors, midiColors) {
     for (let key = 0; key < this.keysNum; key++) {
       this.keys[key].style.fill = this.bgrIntegerToHex(audioColors[key])
@@ -192,7 +234,17 @@ export class PianoKeyboardFull extends PianoKeyboard {
 }
 */
 
+/**
+ * Canvas-based rolling spectrogram tied to piano key layout.
+ */
 export class Spectrogram {
+  /**
+   * Create a spectrogram bound to a canvas element.
+   *
+   * @param {HTMLCanvasElement} canvasElement Target canvas for rendering.
+   * @param {Uint8Array|number[]} keySlices Pixel widths for each key slice along the x-axis.
+   * @param {number} height Total height of the spectrogram in pixels.
+   */
   constructor (canvasElement, keySlices, height) {
     this.canvasElement = canvasElement
     this.keySlices = keySlices
@@ -220,6 +272,12 @@ export class Spectrogram {
     }
   }
 
+  /**
+   * Scroll existing data up and paint the newest analyzer frame at the bottom.
+   *
+   * @param {Uint32Array} audioColors Analyzer-derived colors for each key slice.
+   * @param {Uint32Array} midiColors MIDI highlight colors for each key slice.
+   */
   update (audioColors, midiColors) {
     // shift the whole buffer 1 line upwards
     const lastLine = this.width * (this.height - 1)

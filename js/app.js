@@ -17,6 +17,11 @@ const thresholdInput = document.getElementById('threshold')
 
 const searchParams = new URLSearchParams(window.location.search)
 
+/**
+ * Restore persisted UI settings or reset them to defaults.
+ *
+ * @param {boolean} [reset=false] When true clears localStorage before applying defaults.
+ */
 function loadSettings (reset = false) {
   if (reset === true) {
     localStorage.clear()
@@ -34,6 +39,11 @@ function loadSettings (reset = false) {
   thresholdInput.dispatchEvent(inputEvent)
 }
 
+/**
+ * Prompt the user for a local audio file and attach it to the input element.
+ *
+ * @return {Promise<void>} Resolves when the selected file is ready to play.
+ */
 async function loadLocalFile () {
   const fileHandles = await window.showOpenFilePicker({
     types: [
@@ -51,6 +61,11 @@ async function loadLocalFile () {
   audioElement.src = URL.createObjectURL(fileData)
 }
 
+/**
+ * Ensure the AudioContext, AudioWorklet, and analyzer graph are ready for playback.
+ *
+ * @return {Promise<void>} Resolves once the audio graph is fully initialized.
+ */
 async function setupAudio () {
   if (audioContext === undefined) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)()
@@ -89,6 +104,12 @@ async function setupAudio () {
   pianolizer.parameters.get('threshold').value = Math.pow(parseFloat(thresholdInput.value), 3)
 }
 
+/**
+ * Route the selected microphone into the analyzer pipeline.
+ *
+ * @param {string} deviceId MediaDevices identifier for the chosen input.
+ * @return {Promise<void>} Resolves when the microphone stream is connected.
+ */
 async function setupMicrophone (deviceId) {
   await setupAudio()
   audioSource.disconnect(audioContext.destination)
@@ -113,6 +134,9 @@ async function setupMicrophone (deviceId) {
   }
 }
 
+/**
+ * Register MIDI listeners so hardware input can drive the visualizers.
+ */
 function setupMIDI () {
   if (navigator.requestMIDIAccess === undefined) {
     return
@@ -141,6 +165,9 @@ function setupMIDI () {
       })
 }
 
+/**
+ * Wire DOM controls to audio routing, analyzer parameters, and feature toggles.
+ */
 function setupUI () {
   const playRestart = document.getElementById('play-restart')
   const pianolizerUI = document.getElementById('pianolizer')
@@ -280,7 +307,17 @@ function setupUI () {
   }
 }
 
+/**
+ * Application bootstrap: load assets, construct visualizers, and start rendering.
+ *
+ * @return {Promise<void>} Resolves after the first animation frame request is issued.
+ */
 async function app () {
+  /**
+   * Animation loop that refreshes keyboard and spectrogram visuals.
+   *
+   * @param {DOMHighResTimeStamp} currentTimestamp Frame timestamp supplied by rAF.
+   */
   function draw (currentTimestamp) {
     if (playToggle.disabled || !audioElement.paused) {
       const audioColors = palette.getKeyColors(levels)
