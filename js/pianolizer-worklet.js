@@ -43,13 +43,13 @@ class PianolizerWorklet extends AudioWorkletProcessor {
   static get parameterDescriptors () {
     return [{
       name: 'smooth',
-      defaultValue: 0.04,
+      defaultValue: 0.08,
       minValue: 0,
       maxValue: 0.25,
       automationRate: 'k-rate'
     }, {
       name: 'threshold',
-      defaultValue: 0.05,
+      defaultValue: 0.12,
       minValue: 0,
       maxValue: 1.0,
       automationRate: 'k-rate'

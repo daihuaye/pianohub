@@ -32,10 +32,10 @@ function loadSettings (reset = false) {
   rotationInput.value = localStorage.getItem('rotation') || 0
   rotationInput.dispatchEvent(inputEvent)
 
-  smoothingInput.value = Math.pow(localStorage.getItem('smoothing') || 0.040, 1 / 3)
+  smoothingInput.value = Math.pow(localStorage.getItem('smoothing') || 0.080, 1 / 3)
   smoothingInput.dispatchEvent(inputEvent)
 
-  thresholdInput.value = Math.pow(localStorage.getItem('threshold') || 0.050, 1 / 3)
+  thresholdInput.value = Math.pow(localStorage.getItem('threshold') || 0.120, 1 / 3)
   thresholdInput.dispatchEvent(inputEvent)
 }
 
