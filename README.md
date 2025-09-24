@@ -74,6 +74,32 @@ The [C++ implementation](cpp/pianolizer.hpp) should compile just fine on any pla
 It is known to compile & run successfully with [Clang](https://clang.llvm.org), [GCC](https://gcc.gnu.org) and [Emscripten](https://emscripten.org).
 The target platform should support `double float` operations efficiently (in other words, hardware FPU is rather mandatory).
 
+### Installing emcc (Emscripten)
+
+To build the WebAssembly target you need the `emcc` compiler from the [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html). The commands below install it locally without requiring administrator privileges.
+
+1. Clone the SDK to a convenient location (for example `~/emsdk`):
+   ```
+   git clone https://github.com/emscripten-core/emsdk.git ~/emsdk
+   ```
+2. Install and activate the latest stable toolchain:
+   ```
+   cd ~/emsdk
+   ./emsdk install latest
+   ./emsdk activate latest
+   ```
+3. Load the environment for the current shell session:
+   ```
+   source ~/emsdk/emsdk_env.sh
+   ```
+   Add the `source` line to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) if you want `emcc` available automatically.
+4. Confirm everything is wired up:
+   ```
+   emcc --version
+   ```
+
+Alternative package manager installs are also available: macOS users can run `brew install emscripten`, and Debian/Ubuntu users can run `sudo apt install emscripten` (note that distro packages may lag behind upstream releases).
+
 Compile the [native binary](cpp/main.cpp) (AKA the `pianolizer` CLI utility) _and_ to [WebAssembly](https://webassembly.org/):
 
 ```

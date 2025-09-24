@@ -15,6 +15,15 @@ if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
   exit 1
 fi
 
+cd "${PROJECT_ROOT}"
+
+if command -v emcc >/dev/null 2>&1; then
+  echo "Building WebAssembly bundle (make emscripten)..."
+  make emscripten
+else
+  echo "Warning: emcc not found; skipping 'make emscripten'." >&2
+fi
+
 existing_pids=$(lsof -ti tcp:"${PORT}" || true)
 if [[ -n "${existing_pids}" ]]; then
   echo "Stopping existing server on port ${PORT}..."
@@ -23,8 +32,6 @@ if [[ -n "${existing_pids}" ]]; then
 fi
 
 echo "Starting server on ${BIND_ADDR}:${PORT} (log: ${LOG_FILE})"
-
-cd "${PROJECT_ROOT}"
 
 nohup "${PYTHON_BIN}" -m http.server --bind "${BIND_ADDR}" "${PORT}" \
   >"${LOG_FILE}" 2>&1 &

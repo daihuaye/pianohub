@@ -173,6 +173,7 @@ function setupUI () {
   const pianolizerUI = document.getElementById('pianolizer')
 
   sourceSelect.onchange = event => {
+    console.log('[pianolizer] source changed to', event.target.value)
     audioElement.pause()
     playToggle.innerText = 'Play'
 
@@ -204,16 +205,19 @@ function setupUI () {
 
   playToggle.onclick = async event => {
     if (audioElement.paused) {
+      console.log('[pianolizer] playback started')
       await setupAudio()
       audioElement.play()
       playToggle.innerText = 'Pause'
     } else {
+      console.log('[pianolizer] playback paused')
       audioElement.pause()
       playToggle.innerText = 'Play'
     }
   }
 
   playRestart.onclick = event => {
+    console.log('[pianolizer] playback restarted')
     audioElement.load()
     playToggle.innerText = 'Play'
   }
@@ -231,6 +235,7 @@ function setupUI () {
     if (pianolizer !== undefined) {
       pianolizer.parameters.get('smooth').value = value
     }
+    console.log('[pianolizer] smoothing updated to', value.toFixed(3), 'seconds')
   }
 
   thresholdInput.oninput = event => {
@@ -240,6 +245,7 @@ function setupUI () {
     if (pianolizer !== undefined) {
       pianolizer.parameters.get('threshold').value = value
     }
+    console.log('[pianolizer] noise gate threshold updated to', value.toFixed(3))
   }
 
   pianolizerUI.ondragover = event => {
