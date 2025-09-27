@@ -4,9 +4,14 @@ const HEIGHT = 'height'
 const PUREJS = 'purejs'
 const PITCHFORK = 'pitchfork'
 const TOLERANCE = 'tolerance'
+const PRACTICE_DURATION_SECONDS = 30 * 60
+const HIGH_CONFIDENCE_LEVEL = 0.6
 
 let audioContext, audioSource, microphoneSource, pianolizer
 let levels, midi, palette
+let practiceTimerInterval = null
+let shouldPauseTimerCountdown = false
+let practiceTimerRemaining = PRACTICE_DURATION_SECONDS
 
 const audioElement = document.getElementById('input')
 const playToggle = document.getElementById('play-toggle')
@@ -14,8 +19,86 @@ const sourceSelect = document.getElementById('source')
 const rotationInput = document.getElementById('rotation')
 const smoothingInput = document.getElementById('smoothing')
 const thresholdInput = document.getElementById('threshold')
+const practiceTimerDisplay = document.getElementById('practice-timer-display')
+const practiceTimerRestartButton = document.getElementById('practice-timer-restart')
 
 const searchParams = new URLSearchParams(window.location.search)
+
+/**
+ * Keep the practice timer text in sync with the remaining countdown seconds.
+ */
+function renderPracticeTimer () {
+  if (practiceTimerDisplay === null) {
+    return
+  }
+
+  const minutes = Math.floor(practiceTimerRemaining / 60).toString().padStart(2, '0')
+  const seconds = (practiceTimerRemaining % 60).toString().padStart(2, '0')
+  practiceTimerDisplay.innerText = `${minutes}:${seconds}`
+}
+
+/**
+ * Stop the countdown interval if it is currently running.
+ */
+function stopPracticeTimerInterval () {
+  if (practiceTimerInterval !== null) {
+    clearInterval(practiceTimerInterval)
+    practiceTimerInterval = null
+  }
+}
+
+/**
+ * Reset the practice timer back to the full session length and stop counting.
+ */
+function resetPracticeTimer () {
+  stopPracticeTimerInterval()
+  practiceTimerRemaining = PRACTICE_DURATION_SECONDS
+  renderPracticeTimer()
+}
+
+/**
+ * Begin counting down once per second while time remains.
+ */
+function startPracticeTimer () {
+  if (practiceTimerInterval !== null || practiceTimerRemaining <= 0) {
+    return
+  }
+
+  practiceTimerInterval = setTimeout(() => {
+    if (practiceTimerRemaining <= 1) {
+      practiceTimerRemaining = 0
+      renderPracticeTimer()
+      stopPracticeTimerInterval()
+      return
+    }
+
+    practiceTimerRemaining -= 1
+    renderPracticeTimer()
+    clearTimeout(practiceTimerInterval)
+    practiceTimerInterval = null
+  }, 1000)
+}
+
+/**
+ * Check the analyzer levels and start the timer when confident notes are detected.
+ *
+ * @param {Float32Array} levelSnapshot Intensities reported by the analyzer.
+ */
+function handlePracticeTimerAutoStart (levelSnapshot) {
+  if (practiceTimerRemaining <= 0) {
+    return
+  }
+  let anyHighConfidence = false
+  for (let i = 0; i < levelSnapshot.length; i++) {
+    if (levelSnapshot[i] >= HIGH_CONFIDENCE_LEVEL) {
+      anyHighConfidence = true
+      break
+    }
+  }
+  if (anyHighConfidence) {
+    startPracticeTimer()
+  }
+}
 
 /**
  * Restore persisted UI settings or reset them to defaults.
@@ -93,6 +176,7 @@ async function setupAudio () {
     pianolizer.port.onmessage = event => {
       // TODO: use SharedArrayBuffer for syncing levels
       levels.set(event.data)
+      handlePracticeTimerAutoStart(event.data)
     }
 
     audioSource = audioContext.createMediaElementSource(audioElement)
@@ -248,6 +332,13 @@ function setupUI () {
     console.log('[pianolizer] noise gate threshold updated to', value.toFixed(3))
   }
 
+  if (practiceTimerRestartButton !== null) {
+    practiceTimerRestartButton.onclick = () => {
+      resetPracticeTimer()
+      console.log('[pianolizer] practice timer restarted')
+    }
+  }
+
   pianolizerUI.ondragover = event => {
     event.preventDefault()
   }
@@ -351,6 +442,7 @@ async function app () {
   setupMIDI()
   setupUI()
   loadSettings()
+  renderPracticeTimer()
 
   window.requestAnimationFrame(draw)
 }

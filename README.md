@@ -31,7 +31,11 @@ Install [yt-dlp](https://github.com/yt-dlp/yt-dlp) if you don't already have it:
 
 use the following command, it will download the sounds to ~/Music/ folder
 ```
-yt-dlp -x --audio-format mp3 --audio-quality 0 -o "~/Music/%(title)s.%(ext)s" "https://www.youtube.com/watch?v=msP8f7pFdFg"
+yt-dlp --cookies-from-browser chrome \
+       -f bestaudio \
+       -x --audio-format mp3 \
+       -o "~/Music/%(title)s.%(ext)s" \
+       "https://www.youtube.com/watch?v=_FbLXVP9-Ns"
 ```
 
 ## Description

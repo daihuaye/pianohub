@@ -47,7 +47,29 @@ class Pianolizer {
     this.samplesBuffer = Module._malloc(this.samplesBufferSize * Float32Array.BYTES_PER_ELEMENT)
     const startOffset = this.samplesBuffer / Float32Array.BYTES_PER_ELEMENT
     const endOffset = startOffset + this.samplesBufferSize
-    this.samplesView = Module.HEAPF32.subarray(startOffset, endOffset)
+
+    // Emscripten no longer guarantees HEAP views are mirrored on Module; fall back to direct symbols.
+    let heapF32 = Module.HEAPF32
+    if (heapF32 === undefined && typeof HEAPF32 !== 'undefined') {
+      heapF32 = HEAPF32
+      Module.HEAPF32 = heapF32
+    }
+    if (heapF32 === undefined) {
+      const runtimeMemory = Module.wasmMemory ??
+        (typeof wasmMemory !== 'undefined' ? wasmMemory : undefined) ??
+        (typeof Module.asm !== 'undefined' ? Module.asm.memory : undefined)
+
+      if (runtimeMemory !== undefined) {
+        Module.wasmMemory = runtimeMemory
+        heapF32 = new Float32Array(runtimeMemory.buffer)
+        Module.HEAPF32 = heapF32
+      }
+    }
+    if (heapF32 === undefined) {
+      throw new Error('Emscripten HEAPF32 view is not initialized yet')
+    }
+
+    this.samplesView = heapF32.subarray(startOffset, endOffset)
   }
 
   /**

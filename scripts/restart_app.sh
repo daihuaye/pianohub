@@ -17,11 +17,23 @@ fi
 
 cd "${PROJECT_ROOT}"
 
+if ! command -v emcc >/dev/null 2>&1; then
+  EMSDK_ENV=~/Projects/emsdk/emsdk_env.sh
+  if [[ -f "${EMSDK_ENV}" ]]; then
+    echo "emcc not found; sourcing ${EMSDK_ENV}"
+    # shellcheck source=/dev/null
+    source "${EMSDK_ENV}"
+  else
+    echo "Warning: emcc not found and ${EMSDK_ENV} is missing" >&2
+  fi
+fi
+
 if command -v emcc >/dev/null 2>&1; then
+  make clean
   echo "Building WebAssembly bundle (make emscripten)..."
   make emscripten
 else
-  echo "Warning: emcc not found; skipping 'make emscripten'." >&2
+  echo "Warning: emcc still not found; skipping 'make emscripten'." >&2
 fi
 
 existing_pids=$(lsof -ti tcp:"${PORT}" || true)
