@@ -2,6 +2,7 @@
 <html lang="en-US">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="title" content="Pianolizer">
     <meta name="description" content="An easy-to-use toolkit for music exploration and visualization, an audio spectrum analyzer helping you turn sounds into piano notes">
     <meta name="keywords" content="DSP, Web Assembly, music visualizer, spectrogram, Fourier transform, Audio Worklet, music transcription, sliding DFT, signal processing">
@@ -15,54 +16,77 @@
   </head>
   <body>
     <audio id="input" src="audio/mazurka.mp3" loop></audio>
-    <table id="controls">
-      <tr>
-        <td class="label">Source:</td>
-        <td colspan="3">
-          <select id="source">
-            <option value="?" disabled id="drop-label">Drag&amp;Drop file</option>
-            <option value="audio/mazurka.mp3" selected="selected">Chopin Mazurka in F minor, op. 68 no. 4 (by Pianotomy)</option>
-            <option value="audio/pirates.mp3">Pirates of the Caribbean</option>
-            <option value="audio/50_ANIME.mp3">50 Animate Piano</option>
-            <option value="audio/20_ETERNAL_SONGS.mp3">20 Eternal Songs</option>
-            <option value="audio/chromatic.mp3">Chromatic scale on a piano, ascending</option>
-            <option value="audio/sin.flac">Sine wave, 440 Hz</option>
-            <option value="audio/saw.flac">Sawtooth wave, 110 Hz</option>
-            <option value="audio/squ.flac">Square wave, 110 Hz</option>
-            <option value="audio/noise.flac">Pink noise</option>
-          </select>
-          <button id="play-toggle">Play</button>
-          <button id="play-restart">Restart</button>
-        </td>
-      </tr>
-      <tr>
-        <td class="label">Palette rotation:</td>
-        <td><input id="rotation" type="range" min="0" max="11" step="1" value="0"/></td>
-        <td class="label">Smoothing:</td>
-        <td>
+    <section id="playback-controls" aria-label="Playback controls">
+      <label class="control-group">
+        <span class="label">Source</span>
+        <select id="source">
+          <option value="" selected="selected">Device microphone</option>
+          <option value="?" disabled id="drop-label">Drag&amp;Drop file</option>
+          <option value="audio/mazurka.mp3">Chopin Mazurka in F minor, op. 68 no. 4 (by Pianotomy)</option>
+          <option value="audio/pirates.mp3">Pirates of the Caribbean</option>
+          <option value="audio/50_ANIME.mp3">50 Animate Piano</option>
+          <option value="audio/20_ETERNAL_SONGS.mp3">20 Eternal Songs</option>
+          <option value="audio/chromatic.mp3">Chromatic scale on a piano, ascending</option>
+          <option value="audio/sin.flac">Sine wave, 440 Hz</option>
+          <option value="audio/saw.flac">Sawtooth wave, 110 Hz</option>
+          <option value="audio/squ.flac">Square wave, 110 Hz</option>
+          <option value="audio/noise.flac">Pink noise</option>
+        </select>
+      </label>
+      <div id="playback-actions">
+        <button id="play-toggle">Play</button>
+        <button id="play-restart">Restart</button>
+        <button id="configuration-toggle" type="button" aria-expanded="false" aria-controls="configuration">
+          Show Configuration
+        </button>
+      </div>
+    </section>
+    <div id="configuration-backdrop" aria-hidden="true"></div>
+    <aside id="configuration" aria-hidden="true" aria-label="Configuration panel">
+      <div id="configuration-header">
+        <h2>Configuration</h2>
+        <button id="configuration-close" type="button" aria-label="Close configuration">Close</button>
+      </div>
+      <div id="configuration-content">
+        <label class="control-group" for="rotation">
+          <span class="label">Palette rotation</span>
+          <input id="rotation" type="range" min="0" max="11" step="1" value="0"/>
+        </label>
+        <label class="control-group" for="smoothing">
+          <span class="label">Smoothing</span>
           <input id="smoothing" type="range" min="0" max="1" step="any" value="0.08"/>
           <span id="smoothing-value"></span>
-        </td>
-      </tr>
-      <tr>
-        <td class="label">Threshold:</td>
-        <td>
+        </label>
+        <label class="control-group" for="threshold">
+          <span class="label">Threshold</span>
           <input id="threshold" type="range" min="0" max="1" step="any" value="0.12"/>
           <span id="threshold-value"></span>
-        </td>
-        <td class="label">Implementation:</td>
-        <td>
-          <input type="radio" name="implementation" id="implementation-wasm" value="wasm">
-          <label for="implementation-wasm">WASM</label>
-          <input type="radio" name="implementation" id="implementation-purejs" value="purejs">
-          <label for="implementation-purejs">PureJS</label>
-        </td>
-      </tr>
-    </table>
+        </label>
+        <label class="control-group" for="practice-duration">
+          <span class="label">Practice timer</span>
+          <select id="practice-duration">
+            <option value="60" selected="selected">60 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+        </label>
+        <div class="control-group">
+          <span class="label">Implementation</span>
+          <div id="implementation-options">
+            <input type="radio" name="implementation" id="implementation-wasm" value="wasm">
+            <label for="implementation-wasm">WASM</label>
+            <input type="radio" name="implementation" id="implementation-purejs" value="purejs">
+            <label for="implementation-purejs">PureJS</label>
+          </div>
+        </div>
+      </div>
+    </aside>
     <section id="practice-timer" aria-live="polite">
-      <span class="timer-label">Practice Timer:</span>
-      <span id="practice-timer-display">30:00</span>
-      <button id="practice-timer-restart">Restart Timer</button>
+      <img id="practice-timer-eyes" src="images/eyes.png" alt="Focus eyes">
+      <div id="practice-timer-content">
+        <span class="timer-label">Practice Timer:</span>
+        <span id="practice-timer-display">60:00</span>
+        <button id="practice-timer-restart">Restart Timer</button>
+      </div>
     </section>
     <div id="pianolizer">
       <div id="help">
@@ -73,11 +97,6 @@
       <canvas id="spectrogram"></canvas>
       <br>
       <svg id="keyboard"></svg>
-    </div>
-    <div id="footer">
-      MIT License -
-      Copyright &copy; 2023 Stanislaw Pusep -
-      <a href="https://github.com/creaktive/pianolizer" target="_blank">github.com/creaktive/pianolizer</a>
     </div>
   </body>
 </html>

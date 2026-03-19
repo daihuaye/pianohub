@@ -1,0 +1,90 @@
+- generic [ref=e1]:
+  - region "Playback controls" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Source
+      - combobox "Source" [ref=e5]:
+        - option "Load local audio file"
+        - option "Drag&Drop file" [disabled]
+        - option "Chopin Mazurka in F minor, op. 68 no. 4 (by Pianotomy)" [selected]
+        - option "Pirates of the Caribbean"
+        - option "50 Animate Piano"
+        - option "20 Eternal Songs"
+        - option "Chromatic scale on a piano, ascending"
+        - option "Sine wave, 440 Hz"
+        - option "Sawtooth wave, 110 Hz"
+        - option "Square wave, 110 Hz"
+        - option "Pink noise"
+    - generic [ref=e6]:
+      - button "Play" [ref=e7]
+      - button "Restart" [ref=e8]
+      - button "Hide Configuration" [expanded] [active] [ref=e120]
+  - complementary "Configuration panel" [ref=e122]:
+    - generic [ref=e123]:
+      - heading "Configuration" [level=2] [ref=e124]
+      - button "Close configuration" [ref=e125]: Close
+    - generic [ref=e126]:
+      - generic [ref=e127]:
+        - generic [ref=e128]: Palette rotation
+        - slider "Palette rotation" [ref=e129]: "0"
+      - generic [ref=e130]:
+        - generic [ref=e131]: Smoothing
+        - slider "Smoothing 0.080s" [ref=e132]: "0.430886938006377"
+        - generic [ref=e133]: 0.080s
+      - generic [ref=e134]:
+        - generic [ref=e135]: Threshold
+        - slider "Threshold 0.120" [ref=e136]: "0.493242414866094"
+        - generic [ref=e137]: "0.120"
+      - generic [ref=e138]:
+        - generic [ref=e139]: Implementation
+        - generic [ref=e140]:
+          - radio "WASM" [checked] [ref=e141]
+          - generic [ref=e142]: WASM
+          - radio "PureJS" [ref=e143]
+          - generic [ref=e144]: PureJS
+  - generic [ref=e10]:
+    - generic [ref=e11]: "Practice Timer:"
+    - generic [ref=e12]: 30:00
+    - button "Restart Timer" [ref=e13]
+  - generic [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Drop audio file here or select the Source from the menu and press Play." [level=1] [ref=e16]
+      - heading "Chrome browser is recommended for the best experience :)" [level=2] [ref=e17]
+      - heading "(Safari kind of works but the performance is terrible!)" [level=2] [ref=e18]
+    - img [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e23]: C2
+        - generic [ref=e25]: D2
+        - generic [ref=e27]: E2
+        - generic [ref=e29]: F2
+        - generic [ref=e31]: G2
+        - generic [ref=e33]: A2
+        - generic [ref=e35]: B2
+        - generic [ref=e37]: C3
+        - generic [ref=e39]: D3
+        - generic [ref=e41]: E3
+        - generic [ref=e43]: F3
+        - generic [ref=e45]: G3
+        - generic [ref=e47]: A3
+        - generic [ref=e49]: B3
+        - generic [ref=e51]: C4
+        - generic [ref=e53]: D4
+        - generic [ref=e55]: E4
+        - generic [ref=e57]: F4
+        - generic [ref=e59]: G4
+        - generic [ref=e61]: A4
+        - generic [ref=e63]: B4
+        - generic [ref=e65]: C5
+        - generic [ref=e67]: D5
+        - generic [ref=e69]: E5
+        - generic [ref=e71]: F5
+        - generic [ref=e73]: G5
+        - generic [ref=e75]: A5
+        - generic [ref=e77]: B5
+        - generic [ref=e79]: C6
+        - generic [ref=e81]: D6
+        - generic [ref=e83]: E6
+        - generic [ref=e85]: F6
+        - generic [ref=e87]: G6
+        - generic [ref=e89]: A6
+        - generic [ref=e91]: B6
+        - generic [ref=e93]: C7

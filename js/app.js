@@ -4,21 +4,27 @@ const HEIGHT = 'height'
 const PUREJS = 'purejs'
 const PITCHFORK = 'pitchfork'
 const TOLERANCE = 'tolerance'
-const PRACTICE_DURATION_SECONDS = 30 * 60
+const DEFAULT_PRACTICE_DURATION_MINUTES = 60
 const HIGH_CONFIDENCE_LEVEL = 0.6
 
 let audioContext, audioSource, microphoneSource, pianolizer
 let levels, midi, palette
 let practiceTimerInterval = null
 let shouldPauseTimerCountdown = false
-let practiceTimerRemaining = PRACTICE_DURATION_SECONDS
+let practiceDurationMinutes = DEFAULT_PRACTICE_DURATION_MINUTES
+let practiceTimerRemaining = DEFAULT_PRACTICE_DURATION_MINUTES * 60
 
 const audioElement = document.getElementById('input')
 const playToggle = document.getElementById('play-toggle')
 const sourceSelect = document.getElementById('source')
+const configurationToggle = document.getElementById('configuration-toggle')
+const configurationBackdrop = document.getElementById('configuration-backdrop')
+const configurationPanel = document.getElementById('configuration')
+const configurationClose = document.getElementById('configuration-close')
 const rotationInput = document.getElementById('rotation')
 const smoothingInput = document.getElementById('smoothing')
 const thresholdInput = document.getElementById('threshold')
+const practiceDurationSelect = document.getElementById('practice-duration')
 const practiceTimerDisplay = document.getElementById('practice-timer-display')
 const practiceTimerRestartButton = document.getElementById('practice-timer-restart')
 
@@ -52,7 +58,7 @@ function stopPracticeTimerInterval () {
  */
 function resetPracticeTimer () {
   stopPracticeTimerInterval()
-  practiceTimerRemaining = PRACTICE_DURATION_SECONDS
+  practiceTimerRemaining = practiceDurationMinutes * 60
   renderPracticeTimer()
 }
 
@@ -120,6 +126,10 @@ function loadSettings (reset = false) {
 
   thresholdInput.value = Math.pow(localStorage.getItem('threshold') || 0.120, 1 / 3)
   thresholdInput.dispatchEvent(inputEvent)
+
+  practiceDurationMinutes = parseInt(localStorage.getItem('practiceDurationMinutes') || DEFAULT_PRACTICE_DURATION_MINUTES)
+  practiceDurationSelect.value = practiceDurationMinutes.toString()
+  resetPracticeTimer()
 }
 
 /**
@@ -256,6 +266,37 @@ function setupUI () {
   const playRestart = document.getElementById('play-restart')
   const pianolizerUI = document.getElementById('pianolizer')
 
+  if (configurationToggle !== null && configurationPanel !== null && configurationBackdrop !== null) {
+    const setConfigurationOpen = isOpen => {
+      configurationPanel.classList.toggle('is-open', isOpen)
+      configurationBackdrop.classList.toggle('is-open', isOpen)
+      configurationPanel.setAttribute('aria-hidden', String(!isOpen))
+      configurationBackdrop.setAttribute('aria-hidden', String(!isOpen))
+      configurationToggle.setAttribute('aria-expanded', String(isOpen))
+      configurationToggle.innerText = isOpen ? 'Hide Configuration' : 'Show Configuration'
+    }
+
+    configurationToggle.onclick = () => {
+      setConfigurationOpen(!configurationPanel.classList.contains('is-open'))
+    }
+
+    configurationBackdrop.onclick = () => {
+      setConfigurationOpen(false)
+    }
+
+    if (configurationClose !== null) {
+      configurationClose.onclick = () => {
+        setConfigurationOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && configurationPanel.classList.contains('is-open')) {
+        setConfigurationOpen(false)
+      }
+    })
+  }
+
   sourceSelect.onchange = event => {
     console.log('[pianolizer] source changed to', event.target.value)
     audioElement.pause()
@@ -332,6 +373,15 @@ function setupUI () {
     console.log('[pianolizer] noise gate threshold updated to', value.toFixed(3))
   }
 
+  if (practiceDurationSelect !== null) {
+    practiceDurationSelect.onchange = event => {
+      practiceDurationMinutes = parseInt(event.target.value)
+      localStorage.setItem('practiceDurationMinutes', practiceDurationMinutes)
+      resetPracticeTimer()
+      console.log('[pianolizer] practice timer duration updated to', practiceDurationMinutes, 'minutes')
+    }
+  }
+
   if (practiceTimerRestartButton !== null) {
     practiceTimerRestartButton.onclick = () => {
       resetPracticeTimer()
@@ -369,7 +419,8 @@ function setupUI () {
     .then(() => {
       navigator.mediaDevices.enumerateDevices()
         .then(devices => {
-          devices.filter(device => device.kind === 'audioinput')
+          const audioInputs = devices.filter(device => device.kind === 'audioinput')
+          audioInputs
             .reverse()
             .forEach(device => {
               sourceSelect.add(
@@ -377,6 +428,11 @@ function setupUI () {
                 0
               )
             })
+
+          if (audioInputs.length > 0) {
+            sourceSelect.value = '*' + audioInputs[0].deviceId
+            sourceSelect.dispatchEvent(new Event('change'))
+          }
         })
     })
 

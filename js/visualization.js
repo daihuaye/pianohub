@@ -179,6 +179,8 @@ export class PianoKeyboard {
 
     this.svgElement.setAttribute('width', whiteOffset)
     this.svgElement.setAttribute('height', this.whiteHeight)
+    this.svgElement.setAttribute('viewBox', `0 0 ${whiteOffset} ${this.whiteHeight}`)
+    this.svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet')
   }
 
   /**

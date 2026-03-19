@@ -8,7 +8,7 @@
 
 ### Launch
 
-From the project root run a local static server:
+From the project root folder run a local static server:
 
 ```
 python3 -m http.server --bind 127.0.0.1 8000
